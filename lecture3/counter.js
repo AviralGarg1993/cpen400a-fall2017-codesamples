@@ -36,9 +36,12 @@ g.increment();
 console.log( f.get() + "," + g.get() );
 
 // Closure that keeps a pointer to the enclosing function itself
+// Warning: this example does not illustrate very well the
+// use of "that". Also, the usage of this (/that) is flawed.
 function MultiCounter(initial) {
 	var that = this;
 	var val = [];	
+	console.log(this);
 	this.init = function() {
 		val = [];
 		for (var i=0; i<initial.length; i++) {
@@ -53,7 +56,33 @@ function MultiCounter(initial) {
 	};
 };
 
+// Version which properly uses the this / that
+// trick to store a reference to the outer "this".
+var MultiCounter2 = {
+
+	create: function(initial) {
+
+		var that = this;
+		var val = [];	
+		console.log(this);
+		this.init = function() {
+			val = [];
+			for (var i=0; i<initial.length; i++) {
+				val.push(  initial[i] );
+			};
+		};
+		this.init();
+		return {
+			increment: function(i) { val[i] += 1; },
+			resetAll: function() { that.init(); },
+			getValues: function() { return val; }
+		};
+
+	}
+};
+
 var m = MultiCounter( [1, 2, 3] );
+//m = MultiCounter2.create( [1, 2, 3] );
 m.increment(0);
 m.increment(2);
 m.increment(0);
@@ -144,6 +173,7 @@ var filter = function( array, fn ) {
                 var element = array[i];
                 var args = [ element ];
                 if (fn.apply(null, args) ) result.push(element); 
+                //if (fn(element) ) result.push(element); 
         }
         return result;
 };
